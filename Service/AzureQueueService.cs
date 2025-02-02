@@ -40,5 +40,10 @@ namespace AzureStotageQueuePractice.Service
                 await _queueClient.DeleteMessageAsync(item.MessageId, item.PopReceipt);
             }
         }
+        public async Task<int> NumberOfItemInQueue()
+        {
+            var result = await _queueClient.GetPropertiesAsync();
+            return result.Value.ApproximateMessagesCount;
+        }
     }
 }

@@ -18,6 +18,7 @@ namespace AzureStotageQueuePractice.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewBag.NoItemInQueue = await _queueService.NumberOfItemInQueue();
             var queueMessages = await _queueService.PeekMessages(10);
             return View(queueMessages.ToList());
         }
