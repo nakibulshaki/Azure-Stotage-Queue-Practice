@@ -1,49 +1,94 @@
 ﻿using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
+using AzureStotageQueuePractice.Models;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace AzureStotageQueuePractice.Service
 {
     public class AzureQueueService
     {
-        public readonly QueueClient _queueClient;
+        private readonly QueueClient _queueClient;
+
         public AzureQueueService(QueueClient queueClient)
         {
             _queueClient = queueClient;
         }
-        public async Task SendMessage(string msg)
+
+        public async Task SendMessageAsync(string message)
         {
-          await _queueClient.SendMessageAsync(msg);
+            await _queueClient.SendMessageAsync(message);
         }
-        public async Task<ICollection<PeekedMessage>> PeekMessages(int noOfMsgToRecive)
+
+        public async Task<ICollection<PeekedMessage>> PeekMessagesAsync(int count)
         {
-            PeekedMessage[] pickMsgs = await _queueClient.PeekMessagesAsync(noOfMsgToRecive);
-            return pickMsgs;
+            var peekedMessages = await _queueClient.PeekMessagesAsync(count);
+            return peekedMessages.Value;
         }
-        public async Task ReceiveMessage()
+
+        public async Task<QueueMessage> ReceiveMessageAsync()
         {
-           var result  = await _queueClient.ReceiveMessageAsync();
+            var message = await _queueClient.ReceiveMessageAsync();
+            return message.Value;
         }
-        public async Task ReceiveMessages(int noOfMsgToRecive)
+
+        public async Task<IEnumerable<QueueMessage>> ReceiveMessagesAsync(int count)
         {
-            await _queueClient.ReceiveMessagesAsync(noOfMsgToRecive);
+            var messages = await _queueClient.ReceiveMessagesAsync(count);
+            return messages.Value;
         }
-        public async Task RemoveFromQueue()
+
+        public async Task RemoveFromQueueAsync()
         {
-            var item = await _queueClient.ReceiveMessageAsync();
-             await _queueClient.DeleteMessageAsync(item.Value.MessageId,item.Value.PopReceipt);
-        }
-        public async Task RemoveFromQueue(int noOfMsgToDel)
-        {
-            var queues = await _queueClient.ReceiveMessagesAsync(maxMessages: noOfMsgToDel);
-            foreach (var item in queues.Value)
+            var message = await ReceiveMessageAsync();
+            if (message != null)
             {
-                await _queueClient.DeleteMessageAsync(item.MessageId, item.PopReceipt);
+                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
             }
         }
-        public async Task<int> NumberOfItemInQueue()
+
+        public async Task RemoveFromQueueAsync(int count)
         {
-            var result = await _queueClient.GetPropertiesAsync();
-            return result.Value.ApproximateMessagesCount;
+            var messages = await ReceiveMessagesAsync(count);
+            foreach (var message in messages)
+            {
+                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
+            }
         }
+
+        public async Task<int> GetQueueMessageCountAsync()
+        {
+            var properties = await _queueClient.GetPropertiesAsync();
+            return properties.Value.ApproximateMessagesCount;
+        }
+
+        public async Task SendObjectDataAsMessageAsync()
+        {
+            var cars = GetSampleCars();
+            foreach (var car in cars)
+            {
+                await SendMessageAsync(JsonSerializer.Serialize(car));
+            }
+        }
+
+        public async Task SendListObjectDataAsMessageAsync()
+        {
+            var cars = GetSampleCars();
+            await SendMessageAsync(JsonSerializer.Serialize(cars));
+        }
+
+        private static List<Car> GetSampleCars() => new()
+        {
+            new Car { Id = 1, Name = "Toyota Corolla", BuildYear = 2020 },
+            new Car { Id = 2, Name = "Honda Civic", BuildYear = 2019 },
+            new Car { Id = 3, Name = "Ford Mustang", BuildYear = 2021 },
+            new Car { Id = 4, Name = "Chevrolet Camaro", BuildYear = 2018 },
+            new Car { Id = 5, Name = "BMW 3 Series", BuildYear = 2022 },
+            new Car { Id = 6, Name = "Audi A4", BuildYear = 2017 },
+            new Car { Id = 7, Name = "Mercedes-Benz C-Class", BuildYear = 2023 },
+            new Car { Id = 8, Name = "Tesla Model 3", BuildYear = 2021 },
+            new Car { Id = 9, Name = "Nissan Altima", BuildYear = 2020 },
+            new Car { Id = 10, Name = "Hyundai Elantra", BuildYear = 2019 }
+        };
     }
 }
