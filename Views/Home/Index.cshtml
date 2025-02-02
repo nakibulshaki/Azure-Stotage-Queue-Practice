@@ -1,0 +1,31 @@
+﻿@model List<Azure.Storage.Queues.Models.PeekedMessage>
+
+@{
+    ViewData["Title"] = "Peeked Messages";
+}
+
+<h2>Azure Queue Peeked Messages</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Message ID</th>
+            <th>Message Body</th>
+            <th>Inserted On</th>
+            <th>Expires On</th>
+            <th>Dequeue Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var message in Model)
+        {
+            <tr>
+                <td>@message.MessageId</td>
+                <td>@message.Body.ToString()</td>
+                <td>@message.InsertedOn</td>
+                <td>@message.ExpiresOn</td>
+                <td>@message.DequeueCount</td>
+            </tr>
+        }
+    </tbody>
+</table>
