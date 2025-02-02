@@ -23,7 +23,13 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AddTestStorageQueues">Add Test Queues</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AddTestStorageQueues">Add Test Queue</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="RemoveFromStorageQueues">Remove Item From Queue</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="RemoveFromStorageQueues" asp-route-noOfMsgToDel="3">Remove 3 Item From Queue</a>
                         </li>
                     </ul>
                 </div>
